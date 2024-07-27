@@ -1,0 +1,82 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import wikipedia
+
+# Initialize speech recognition
+recognizer = sr.Recognizer()
+
+# Initialize text-to-speech engine
+engine = pyttsx3.init()
+
+# Function to speak the given text
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+# Function to recognize speech input
+def listen():
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.adjust_for_ambient_noise(source)
+        try:
+            audio = recognizer.listen(source, timeout=5)
+            print("Recognizing...")
+            query = recognizer.recognize_google(audio, language='en-US')
+            print(f"User said: {query}\n")
+            return query.lower()
+        except sr.UnknownValueError:
+            speak("Sorry, I did not understand that.")
+        except sr.RequestError:
+            speak("Sorry, I'm having trouble connecting to the speech recognition service.")
+        except Exception as e:
+            print(e)
+            speak("An error occurred while processing your request.")
+        return None
+
+# Function to handle user commands
+def handle_commands(query):
+    if 'hello' in query:
+        speak("Hello! How can I help you today?")
+    elif 'time' in query:
+        current_time = datetime.datetime.now().strftime("%H:%M")
+        speak(f"The current time is {current_time}")
+    elif 'date' in query:
+        current_date = datetime.datetime.now().strftime("%A, %B %d, %Y")
+        speak(f"Today's date is {current_date}")
+    elif 'search' in query:
+        speak("What do you want me to search for?")
+        search_query = listen()
+        if search_query:
+            try:
+                search_result = wikipedia.summary(search_query, sentences=2)
+                speak(f"According to Wikipedia, {search_result}")
+            except wikipedia.exceptions.DisambiguationError:
+                speak("It seems there are multiple results. Please be more specific.")
+            except wikipedia.exceptions.PageError:
+                speak("Sorry, I couldn't find any information on that topic.")
+            except wikipedia.exceptions.RedirectError:
+                speak("Sorry, there was an issue with the Wikipedia page.")
+            except Exception as e:
+                print(e)
+                speak("An error occurred while searching Wikipedia.")
+    else:
+        speak("Sorry, I did not understand that command.")
+
+# Main loop to listen for commands
+if __name__ == "__main__":
+    speak("Hello! I'm your voice assistant. How can I help you today?")
+    
+    try:
+        while True:
+            query = listen()
+            
+            if query:
+                handle_commands(query)
+                
+            # Exit condition
+            if query and 'exit' in query:
+                speak("Goodbye!")
+                break
+    except KeyboardInterrupt:
+        speak("Goodbye!")
