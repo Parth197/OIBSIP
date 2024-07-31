@@ -5,21 +5,21 @@ import requests
 import json
 import geocoder
 
-# Constants
+
 API_KEY = '0da047f346d839d1b587ced886eb6d96'
 BASE_URL = 'http://api.openweathermap.org/data/2.5/'
 
-# Function to get weather data
+
 def get_weather_data(location):
     try:
-        # Get current weather
+        
         response = requests.get(f"{BASE_URL}weather?q={location}&appid={API_KEY}&units=metric")
         weather_data = response.json()
 
         if weather_data['cod'] != 200:
             raise ValueError(weather_data.get('message', 'Unable to get weather data'))
 
-        # Extract data
+        
         city = weather_data['name']
         description = weather_data['weather'][0]['description']
         temp = weather_data['main']['temp']
@@ -27,7 +27,7 @@ def get_weather_data(location):
         wind_speed = weather_data['wind']['speed']
         icon_code = weather_data['weather'][0]['icon']
 
-        # Get forecast data
+        
         response = requests.get(f"{BASE_URL}forecast?q={location}&appid={API_KEY}&units=metric")
         forecast_data = response.json()
         
@@ -48,7 +48,7 @@ def get_weather_data(location):
         messagebox.showerror("Error", f"Failed to retrieve data: {str(e)}")
         return None
 
-# Function to update weather info on the GUI
+
 def update_weather():
     location = location_entry.get()
     if not location:
@@ -65,7 +65,7 @@ def update_weather():
     humidity_label.config(text=f"Humidity: {weather_data['humidity']}%")
     wind_label.config(text=f"Wind Speed: {weather_data['wind_speed']} m/s")
 
-    # Update weather icon
+    
     icon_url = f"http://openweathermap.org/img/wn/{weather_data['icon_code']}@2x.png"
     icon_response = requests.get(icon_url)
     icon_image = Image.open(icon_response.content)
@@ -74,7 +74,7 @@ def update_weather():
     icon_label.config(image=icon_photo)
     icon_label.image = icon_photo
 
-    # Update forecasts
+    
     hourly_text = "Hourly Forecast:\n"
     for hour in weather_data['hourly_forecast']:
         dt = hour['dt_txt']
@@ -91,7 +91,7 @@ def update_weather():
         daily_text += f"{dt}: {temp}°C, {description}\n"
     daily_label.config(text=daily_text)
 
-# Function to use current location
+
 def use_current_location():
     g = geocoder.ip('me')
     location = g.city
@@ -102,7 +102,7 @@ def use_current_location():
     else:
         messagebox.showwarning("Location Error", "Unable to detect your location.")
 
-# GUI setup
+
 root = tk.Tk()
 root.title("Weather App")
 
